@@ -28,6 +28,8 @@ interface BookingNotificationData {
   createdAt: string;
 }
 
+console.log(mg);
+
 // Send email using Mailgun
 async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
   try {
