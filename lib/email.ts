@@ -75,7 +75,7 @@ async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData
 
     const data = {
       from: 'Six Hour Layover <noreply@sixhourlayover.com>',
-      to: ['tech@sixhourlayover.com'],
+      to: ['booking@sixhourlayover.com'],
       subject: `🎉 New Booking Confirmed - ${bookingInfo.customerName}`,
       html: emailContent,
     };
