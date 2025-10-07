@@ -32,6 +32,7 @@ interface BookingNotificationData {
 
 // Send email using Mailgun
 async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
+      console.log(mg);
   try {
     if (!mg) {
       console.log('⚠️ Mailgun not configured. Email not sent.');
