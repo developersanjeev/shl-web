@@ -28,7 +28,7 @@ interface BookingNotificationData {
   createdAt: string;
 }
 
-console.log(mg);
+
 
 // Send email using Mailgun
 async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
@@ -37,6 +37,8 @@ async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData
       console.log('⚠️ Mailgun not configured. Email not sent.');
       return false;
     }
+
+    console.log(mg);
 
     const emailContent = `
       <h2>🎉 New Booking Confirmed</h2>
