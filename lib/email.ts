@@ -85,7 +85,7 @@ async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData
       html: emailContent,
     };
 
-    const response = await mg.messages().send(data, (error, body) => {
+    const response = await mg.messages().send(data, (error, body ,mg) => {
       if (error) {
         console.error('❌ Email sending failed:', error,mg);
         return NextResponse.json({ success: false, error });
