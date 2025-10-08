@@ -31,7 +31,7 @@ interface BookingNotificationData {
 
 
 // Send email using Mailgun
-async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
+export async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
       console.log(mg);
   try {
     if (!mg) {
