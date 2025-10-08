@@ -10,8 +10,16 @@ const stripe = process.env.STRIPE_SECRET_KEY
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Ensure that Mailgun API key and domain are set in the environment variables
+const mailgunApiKey = process.env.MAILGUN_API_KEY;
+const mailgunDomain = process.env.MAILGUN_DOMAIN;
+
+if (!mailgunApiKey || !mailgunDomain) {
+  throw new Error("MAILGUN_API_KEY or MAILGUN_DOMAIN is not defined in the environment variables.");
+}
+
 // Initialize Mailgun
-const mg = mailgun({ apiKey: process.env.MAILGUN_API_KEY, domain: 'sixhourlayover.com' });
+const mg = mailgun({ apiKey: mailgunApiKey, domain: mailgunDomain });
 
 interface BookingNotificationData {
   sessionId: string;
