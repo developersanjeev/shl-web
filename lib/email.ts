@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import * as mailgun from 'mailgun-js';
+import mailgun from 'mailgun-js'; // Fixed import for Mailgun
 
 const stripe = process.env.STRIPE_SECRET_KEY
   ? new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -28,19 +28,16 @@ interface BookingNotificationData {
   createdAt: string;
 }
 
-
-
 // Send email using Mailgun
 export async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
-      console.log(mg);
   try {
+    // Check if Mailgun is configured
     if (!mg) {
       console.log('⚠️ Mailgun not configured. Email not sent.');
       return false;
     }
 
-    console.log(mg);
-
+    // Prepare the email content
     const emailContent = `
       <h2>🎉 New Booking Confirmed</h2>
       
@@ -85,21 +82,15 @@ export async function sendBookingNotificationEmail(bookingInfo: BookingNotificat
       html: emailContent,
     };
 
-    const response = await mg.messages().send(data, (error, body ,mg) => {
-      if (error) {
-        console.error('❌ Email sending faileg d:', error,mg);
-        return NextResponse.json({ success: false, error, 'mg':mg });
-      }
+    // Send the email using Mailgun
+    const response = await mg.messages().send(data);
 
-      console.log('✅ Email sent successfully:', body);
-      return NextResponse.json({ success: true, body });
-    });
-
+    // Log success and return response
+    console.log('✅ Email sent successfully:', response);
     return true;
   } catch (error) {
-
+    // Log any errors
     console.error('❌ Failed to send notification email:', error);
     return false;
   }
 }
-
