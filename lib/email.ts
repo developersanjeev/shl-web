@@ -39,23 +39,25 @@ interface BookingNotificationData {
 // Send email using Mailgun
 export async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
   try {
-    // Check if Mailgun is configured
+    console.log('🚀 Starting sendBookingNotificationEmail function...');
+    
+    // Step 1: Check Mailgun config
     if (!mg) {
-      console.log('⚠️ Mailgun not configured. Email not sent.');
+      console.warn('⚠️ Mailgun not configured. Email not sent.');
       return false;
     }
+    console.log('✅ Mailgun is configured.');
 
-    // Prepare the email content
+    // Step 2: Prepare email content
+    console.log('📄 Preparing email content...');
     const emailContent = `
       <h2>🎉 New Booking Confirmed</h2>
-      
       <h3>Customer Information</h3>
       <ul>
         <li><strong>Name:</strong> ${bookingInfo.customerName}</li>
         <li><strong>Email:</strong> ${bookingInfo.customerEmail || 'N/A'}</li>
         <li><strong>Phone:</strong> ${bookingInfo.customerPhone || 'N/A'}</li>
       </ul>
-      
       <h3>Booking Details</h3>
       <ul>
         <li><strong>Tour Option:</strong> ${bookingInfo.tourOption || 'N/A'}</li>
@@ -63,7 +65,6 @@ export async function sendBookingNotificationEmail(bookingInfo: BookingNotificat
         <li><strong>Total Amount:</strong> $${bookingInfo.paymentAmount.toFixed(2)} ${bookingInfo.currency}</li>
         <li><strong>Payment Status:</strong> ${bookingInfo.paymentStatus}</li>
       </ul>
-      
       <h3>Technical Details</h3>
       <ul>
         <li><strong>Booking ID:</strong> ${bookingInfo.bookingId || 'N/A'}</li>
@@ -79,26 +80,29 @@ export async function sendBookingNotificationEmail(bookingInfo: BookingNotificat
           second: '2-digit'
         })}</li>
       </ul>
-      
       <p><em>This booking was automatically processed through the Six Hour Layover booking system.</em></p>
     `;
+    console.log('✅ Email content prepared.');
 
+    // Step 3: Prepare Mailgun data
+    console.log('📤 Preparing Mailgun data...');
     const data = {
       from: 'Six Hour Layover <noreply@sixhourlayover.com>',
       to: ['booking@sixhourlayover.com'],
       subject: `🎉 New Booking Confirmed - ${bookingInfo.customerName}`,
       html: emailContent,
     };
+    console.log('✅ Mailgun data ready:', data);
 
-    // Send the email using Mailgun
+    // Step 4: Send email
+    console.log('✉️ Sending email via Mailgun...');
     const response = await mg.messages().send(data);
-
-    // Log success and return response
     console.log('✅ Email sent successfully:', response);
+
     return true;
   } catch (error) {
-    // Log any errors
     console.error('❌ Failed to send notification email:', error);
     return false;
   }
 }
+
