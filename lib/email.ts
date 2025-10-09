@@ -1,7 +1,25 @@
-import { Resend } from 'resend';
+import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import mailgun from 'mailgun-js'; // Fixed import for Mailgun
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-08-27.basil',
+    })
+  : null;
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+// Ensure that Mailgun API key and domain are set in the environment variables
+const mailgunApiKey = process.env.MAILGUN_API_KEY;
+const mailgunDomain = process.env.MAILGUN_DOMAIN;
+
+if (!mailgunApiKey || !mailgunDomain) {
+  throw new Error("MAILGUN_API_KEY or MAILGUN_DOMAIN is not defined in the environment variables.");
+}
+
+// Initialize Mailgun
+const mg = mailgun({ apiKey: mailgunApiKey, domain: mailgunDomain });
 
 interface BookingNotificationData {
   sessionId: string;
@@ -18,36 +36,16 @@ interface BookingNotificationData {
   createdAt: string;
 }
 
+// Send email using Mailgun
 export async function sendBookingNotificationEmail(bookingInfo: BookingNotificationData): Promise<boolean> {
   try {
-    if (!resend) {
-      console.log('⚠️ Resend not configured. Email not sent.');
-      console.log('📧 Email notification data for tech@sixhourlayover.com:');
-      console.log('═══════════════════════════════════════════════════════════');
-      console.log(`Subject: 🎉 New Booking Confirmed - ${bookingInfo.customerName}`);
-      console.log(`Customer: ${bookingInfo.customerName}`);
-      console.log(`Email: ${bookingInfo.customerEmail || 'N/A'}`);
-      console.log(`Phone: ${bookingInfo.customerPhone || 'N/A'}`);
-      console.log(`Tour: ${bookingInfo.tourOption || 'N/A'}`);
-      console.log(`Preferred Language: ${bookingInfo.preferredLanguage}`);
-      console.log(`Amount: $${bookingInfo.paymentAmount.toFixed(2)} ${bookingInfo.currency}`);
-      console.log(`Payment Status: ${bookingInfo.paymentStatus}`);
-      console.log(`Booking ID: ${bookingInfo.bookingId || 'N/A'}`);
-      console.log(`Session ID: ${bookingInfo.sessionId}`);
-      console.log(`Payment Intent: ${bookingInfo.paymentIntentId || 'N/A'}`);
-      console.log(`Timestamp: ${new Date().toLocaleString('en-US', {
-        timeZone: 'America/Los_Angeles',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      })}`);
-      console.log('═══════════════════════════════════════════════════════════');
+    // Check if Mailgun is configured
+    if (!mg) {
+      console.log('⚠️ Mailgun not configured. Email not sent.');
       return false;
     }
 
+    // Prepare the email content
     const emailContent = `
       <h2>🎉 New Booking Confirmed</h2>
       
@@ -85,22 +83,21 @@ export async function sendBookingNotificationEmail(bookingInfo: BookingNotificat
       <p><em>This booking was automatically processed through the Six Hour Layover booking system.</em></p>
     `;
 
-    const response = await resend.emails.send({
+    const data = {
       from: 'Six Hour Layover <noreply@sixhourlayover.com>',
-      to: ['tech@sixhourlayover.com'],
+      to: ['booking@sixhourlayover.com'],
       subject: `🎉 New Booking Confirmed - ${bookingInfo.customerName}`,
       html: emailContent,
-    });
+    };
 
-    if (response.error) {
-      console.error('❌ Email sending failed:', response.error);
-      return false;
-    }
+    // Send the email using Mailgun
+    const response = await mg.messages().send(data);
 
-    console.log('✅ Email notification sent successfully:', response.data?.id);
+    // Log success and return response
+    console.log('✅ Email sent successfully:', response);
     return true;
-
   } catch (error) {
+    // Log any errors
     console.error('❌ Failed to send notification email:', error);
     return false;
   }
