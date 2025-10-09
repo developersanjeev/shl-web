@@ -93,7 +93,7 @@ export async function sendBookingNotificationEmail(bookingInfo: BookingNotificat
     });
 
     if (response.error) {
-      console.error('❌ Email sending failed:', response.error);
+      console.error('❌ Email sending faile  d:', response.error);
       return false;
     }
 
